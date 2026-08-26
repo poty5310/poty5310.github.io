@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>안식년으로 가는 40일 · RE-BOOT 아카이브</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+<style>
+  :root{
+    --paper:#F3EFE4;
+    --paper-2:#EAE3D2;
+    --paper-3:#FBF9F2;
+    --ink:#1B2A38;
+    --ink-soft:#3A4756;
+    --line:#D8CFBC;
+    --line-soft:#E4DDC9;
+    --muted:#8A8272;
+    --gold:#B8862B;
+    --good:#2F6E63;
+
+    --c-ebook:#6B4226;
+    --c-web:#2F6E63;
+    --c-insta:#A6432D;
+    --c-shop:#B8862B;
+    --c-build:#3B4A6B;
+    --c-jp:#7A4B8C;
+    --c-auto:#55606B;
+    --c-review:#1B2A38;
+    --c-buffer:#8A8272;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse at top left, rgba(184,134,43,0.06), transparent 55%),
+      var(--paper);
+    color:var(--ink);
+    font-family:'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+    padding-bottom:60px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .mono{ font-family:'IBM Plex Mono', ui-monospace, monospace; letter-spacing:0.01em; }
+
+  /* ===== Header ===== */
+  header{
+    max-width:920px;
+    margin:0 auto;
+    padding:34px 20px 22px;
+  }
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11.5px;
+    letter-spacing:0.14em;
+    color:var(--gold);
+    text-transform:uppercase;
+    margin:0 0 10px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .eyebrow::before{ content:'●'; font-size:8px; color:var(--good); }
+  h1{
+    font-family:'IBM Plex Mono', monospace;
+    font-weight:700;
+    font-size:clamp(26px, 5vw, 40px);
+    line-height:1.15;
+    margin:0 0 10px;
+    color:var(--ink);
+  }
+  .sub{ color:var(--ink-soft); font-size:14.5px; line-height:1.6; margin:0 0 22px; max-width:60ch; }
+
+  .headline-row{
+    display:flex;
+    gap:14px;
+    flex-wrap:wrap;
+    align-items:stretch;
+  }
+  .dday-box{
+    background:var(--ink);
+    color:var(--paper-3);
+    border-radius:4px;
+    padding:16px 20px;
+    min-width:150px;
+    position:relative;
+    overflow:hidden;
+  }
+  .dday-box::after{
+    content:'';
+    position:absolute; inset:0;
+    background:linear-gradient(135deg, rgba(184,134,43,0.25), transparent 60%);
+  }
+  .dday-label{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:0.1em; opacity:0.75; text-transform:uppercase; position:relative;}
+  .dday-num{ font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:34px; margin-top:4px; position:relative; color:#F2C879;}
+  .dday-sub{ font-size:11.5px; opacity:0.7; margin-top:2px; position:relative;}
+
+  .progress-box{
+    flex:1;
+    min-width:220px;
+    background:var(--paper-3);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:16px 20px;
+  }
+  .progress-box .plabel{
+    display:flex; justify-content:space-between; align-items:baseline;
+    font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.06em; color:var(--muted); text-transform:uppercase;
+    margin-bottom:8px;
+  }
+  .progress-box .pnum{ color:var(--ink); font-size:13px; font-weight:600; }
+  .bar-track{ height:8px; background:var(--line-soft); border-radius:5px; overflow:hidden; }
+  .bar-fill{ height:100%; background:linear-gradient(90deg, var(--gold), var(--good)); border-radius:5px; transition:width .4s ease; width:0%;}
+
+  /* ===== Today mission card ===== */
+  .today-card{
+    max-width:920px; margin:0 auto 26px; padding:0 20px;
+  }
+  .today-inner{
+    background:var(--paper-3);
+    border:1.5px solid var(--ink);
+    border-radius:6px;
+    padding:18px 20px;
+    position:relative;
+  }
+  .today-tag{
+    font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:0.1em; text-transform:uppercase;
+    color:var(--good); margin-bottom:8px; display:flex; align-items:center; gap:6px;
+  }
+  .today-tag::before{content:'▸';}
+  .today-date{ font-weight:700; font-size:15.5px; margin-bottom:10px;}
+  .today-empty{ color:var(--muted); font-size:13.5px; }
+  .task-row{
+    display:flex; gap:10px; align-items:flex-start; padding:9px 0; border-top:1px dashed var(--line);
+  }
+  .task-row:first-of-type{ border-top:none; }
+  .task-check{
+    width:19px; height:19px; border-radius:4px; border:1.5px solid var(--muted);
+    flex-shrink:0; margin-top:2px; cursor:pointer; position:relative; background:var(--paper-3);
+    transition:all .15s ease;
+  }
+  .task-check.checked{ background:var(--good); border-color:var(--good); }
+  .task-check.checked::after{
+    content:''; position:absolute; left:5px; top:1px; width:5px; height:9px;
+    border-right:2px solid #fff; border-bottom:2px solid #fff; transform:rotate(40deg);
+  }
+  .task-text{ font-size:14px; line-height:1.5; cursor:pointer; }
+  .task-text.checked{ color:var(--muted); text-decoration:line-through; text-decoration-color:var(--line); }
+  .task-meta{ display:flex; gap:6px; margin-top:4px; flex-wrap:wrap; }
+  .chip{
+    font-family:'IBM Plex Mono',monospace; font-size:10px; padding:2px 7px; border-radius:20px;
+    display:inline-flex; align-items:center; gap:4px; color:#fff; white-space:nowrap;
+  }
+  .chip-time{ background:none; border:1px solid var(--line); color:var(--muted); }
+
+  /* ===== Tabs ===== */
+  .tabbar{
+    max-width:920px; margin:0 auto 20px; padding:0 20px;
+    display:flex; gap:8px; flex-wrap:wrap;
+  }
+  .tabbtn{
+    font-family:'IBM Plex Mono',monospace; font-size:12.5px; letter-spacing:0.03em;
+    background:transparent; border:1px solid var(--line); color:var(--ink-soft);
+    padding:9px 16px; border-radius:20px; cursor:pointer; transition:all .15s ease;
+  }
+  .tabbtn.active{ background:var(--ink); color:var(--paper-3); border-color:var(--ink); }
+  .tabbtn:hover:not(.active){ border-color:var(--gold); color:var(--ink); }
+
+  main{ max-width:920px; margin:0 auto; padding:0 20px; }
+  .panel{ display:none; }
+  .panel.active{ display:block; }
+
+  /* ===== Legend ===== */
+  .legend{ display:flex; gap:10px 16px; flex-wrap:wrap; margin:0 0 20px; padding:12px 16px; background:var(--paper-2); border-radius:4px; }
+  .legend-item{ display:flex; align-items:center; gap:6px; font-size:12px; color:var(--ink-soft); }
+  .dot{ width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+
+  /* ===== Month tabs ===== */
+  .monthbar{ display:flex; gap:6px; margin-bottom:16px; }
+  .monthbtn{
+    font-family:'IBM Plex Mono',monospace; font-size:12.5px; background:var(--paper-3);
+    border:1px solid var(--line); padding:7px 14px; border-radius:4px; cursor:pointer; color:var(--ink-soft);
+  }
+  .monthbtn.active{ background:var(--gold); border-color:var(--gold); color:#fff; font-weight:600; }
+
+  /* ===== Calendar grid ===== */
+  .cal-head{ display:grid; grid-template-columns:repeat(7,1fr); gap:6px; margin-bottom:6px; }
+  .cal-head div{ text-align:center; font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--muted); padding:4px 0; }
+  .cal-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:6px; margin-bottom:22px; }
+  .cell{ min-height:78px; border-radius:5px; padding:7px 6px; position:relative; cursor:default; }
+  .cell.empty{ background:transparent; }
+  .cell.weekend{ background:transparent; border:1px dashed var(--line-soft); color:var(--muted); }
+  .cell.holiday{ background:var(--line-soft); color:var(--muted); }
+  .cell .daynum{ font-family:'IBM Plex Mono',monospace; font-size:13px; font-weight:600; }
+  .cell .daylabel{ font-size:9.5px; margin-top:1px; }
+
+  .cell.workday{
+    background:var(--paper-3); border:1px solid var(--line); cursor:pointer;
+    transition:transform .12s ease, box-shadow .12s ease;
+  }
+  .cell.workday::before, .cell.workday::after{
+    content:''; position:absolute; top:5px; width:5px; height:5px; border-radius:50%;
+    background:var(--paper); box-shadow:inset 0 0 0 1px var(--line);
+  }
+  .cell.workday::before{ left:8px; }
+  .cell.workday::after{ right:8px; }
+  .cell.workday:hover{ transform:translateY(-2px); box-shadow:0 4px 10px rgba(27,42,56,0.12); border-color:var(--gold); }
+  .cell.workday.selected{ border:1.5px solid var(--ink); box-shadow:0 4px 10px rgba(27,42,56,0.15); }
+  .cell.workday.alldone{ background:linear-gradient(180deg, rgba(47,110,99,0.10), var(--paper-3)); border-color:var(--good); }
+  .cell.buffer{ background:var(--paper-3); border:1.5px dashed var(--gold); cursor:pointer; }
+  .cell .dots{ display:flex; gap:3px; flex-wrap:wrap; margin-top:20px; }
+  .cell .dots .dot{ width:6px; height:6px; }
+  .cell .count{ position:absolute; bottom:6px; right:7px; font-family:'IBM Plex Mono',monospace; font-size:9.5px; color:var(--muted); }
+  .cell .count.done{ color:var(--good); font-weight:700; }
+  .cell .phase-code{ position:absolute; top:5px; right:8px; font-family:'IBM Plex Mono',monospace; font-size:8px; color:var(--muted); opacity:.7;}
+
+  /* ===== Day detail panel ===== */
+  .detail{
+    background:var(--paper-3); border:1px solid var(--line); border-radius:6px; padding:18px 20px; margin-bottom:30px;
+  }
+  .detail-head{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:4px; flex-wrap:wrap; gap:6px;}
+  .detail-title{ font-weight:700; font-size:15.5px; }
+  .detail-phase{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--muted); }
+  .detail-empty{ color:var(--muted); font-size:13.5px; padding:10px 0; }
+
+  /* ===== Checklist tab ===== */
+  .phase-block{ margin-bottom:30px; }
+  .phase-title{
+    font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:14px; color:var(--ink);
+    padding-bottom:8px; border-bottom:1.5px solid var(--ink); margin-bottom:14px;
+    display:flex; justify-content:space-between; align-items:baseline;
+  }
+  .phase-title span.small{ font-size:11px; color:var(--muted); font-weight:500; }
+  .date-group{ margin-bottom:14px; }
+  .date-group-head{
+    font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--gold); font-weight:600;
+    margin-bottom:6px; padding-left:2px;
+  }
+  .date-group .task-row{ padding-left:2px; }
+
+  /* ===== Project status tab ===== */
+  .stat-row{ margin-bottom:16px; }
+  .stat-top{ display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+  .stat-name{ display:flex; align-items:center; gap:8px; font-size:13.5px; font-weight:600; }
+  .stat-frac{ font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--muted); }
+  .stat-bar{ height:7px; background:var(--line-soft); border-radius:5px; overflow:hidden; }
+  .stat-fill{ height:100%; border-radius:5px; }
+
+  /* ===== Footer ===== */
+  footer{ max-width:920px; margin:30px auto 0; padding:20px; text-align:center; }
+  .reset-btn{
+    font-family:'IBM Plex Mono',monospace; font-size:11.5px; background:none; border:1px solid var(--line);
+    color:var(--muted); padding:8px 16px; border-radius:20px; cursor:pointer;
+  }
+  .reset-btn:hover{ border-color:#A6432D; color:#A6432D; }
+  .foot-note{ font-size:11.5px; color:var(--muted); margin-top:10px; }
+
+  @media (max-width:520px){
+    .cell{ min-height:64px; padding:5px 4px; }
+    .cell .dots{ margin-top:16px; }
+    .headline-row{ flex-direction:column; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <p class="eyebrow">Re-Boot AI Lab · 은퇴 준비 아카이브</p>
+  <h1>안식년으로 가는 40일</h1>
+  <p class="sub">2026.08.27 – 2026.10.31 · 실근무일 42일(연차 2일 버퍼 포함) 동안 6개 프로젝트의 씨앗을 심습니다. 11월 1일부터는 자동화된 파이프라인으로 본격 운영을 시작해요.</p>
+  <div class="headline-row">
+    <div class="dday-box">
+      <div class="dday-label">안식년까지</div>
+      <div class="dday-num" id="ddayNum">D-66</div>
+      <div class="dday-sub" id="ddaySub">2026.11.01 시작</div>
+    </div>
+    <div class="progress-box">
+      <div class="plabel"><span>전체 진행률</span><span class="pnum" id="progNum">0 / 0</span></div>
+      <div class="bar-track"><div class="bar-fill" id="progFill"></div></div>
+    </div>
+  </div>
+</header>
+
+<div class="today-card">
+  <div class="today-inner">
+    <div class="today-tag">오늘의 미션</div>
+    <div class="today-date" id="todayDate">-</div>
+    <div id="todayTasks"></div>
+  </div>
+</div>
+
+<div class="tabbar">
+  <button class="tabbtn active" data-tab="cal">📅 캘린더</button>
+  <button class="tabbtn" data-tab="list">✅ 전체 체크리스트</button>
+  <button class="tabbtn" data-tab="stat">🗂️ 프로젝트 현황</button>
+</div>
+
+<main>
+  <!-- CALENDAR PANEL -->
+  <section class="panel active" id="panel-cal">
+    <div class="legend" id="legend"></div>
+    <div class="monthbar" id="monthbar"></div>
+    <div class="cal-head">
+      <div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+    <div class="detail" id="detail">
+      <div class="detail-empty">달력에서 날짜를 눌러 그날의 할 일을 확인하세요.</div>
+    </div>
+  </section>
+
+  <!-- CHECKLIST PANEL -->
+  <section class="panel" id="panel-list"></section>
+
+  <!-- STATUS PANEL -->
+  <section class="panel" id="panel-stat"></section>
+</main>
+
+<footer>
+  <button class="reset-btn" id="resetBtn">전체 체크 초기화</button>
+  <p class="foot-note">체크 상태는 이 브라우저에 자동 저장됩니다 · 정사서의 기록카드처럼, 하루하루를 쌓아가요 🗂️</p>
+</footer>
+
+<script>
+/* ============ DATA ============ */
+const CATS = {
+  ebook:  {label:'전자책·블로그',      emoji:'📘', color:'var(--c-ebook)'},
+  web:    {label:'Re-Boot AI Lab',    emoji:'💻', color:'var(--c-web)'},
+  insta:  {label:'시사 인스타',        emoji:'📰', color:'var(--c-insta)'},
+  shop:   {label:'쇼핑쇼츠',           emoji:'🛒', color:'var(--c-shop)'},
+  build:  {label:'건축 스토리',        emoji:'🏠', color:'var(--c-build)'},
+  jp:     {label:'일본쇼츠',           emoji:'🇯🇵', color:'var(--c-jp)'},
+  auto:   {label:'자동화',             emoji:'⚙️', color:'var(--c-auto)'},
+  review: {label:'점검·회고',          emoji:'🗂️', color:'var(--c-review)'},
+  buffer: {label:'예비일',             emoji:'🎫', color:'var(--c-buffer)'}
+};
+
+const PHASES = [
+  {id:1, name:'1단계 · 인프라 세팅',              start:'2026-08-27', end:'2026-08-31'},
+  {id:2, name:'2단계 · 파이프라인 구축 & 초기 제작', start:'2026-09-01', end:'2026-09-30'},
+  {id:3, name:'3단계 · 자동화 완성 & 런칭 리허설',   start:'2026-10-01', end:'2026-10-31'}
+];
+
+const HOLIDAYS = {
+  '2026-09-03':'방송의 날', '2026-09-24':'추석연휴', '2026-09-25':'추석연휴', '2026-09-26':'추석연휴',
+  '2026-10-03':'개천절', '2026-10-05':'대체공휴일', '2026-10-09':'한글날'
+};
+
+const RAW_TASKS = [
+  ['2026-08-27','auto','40일 플랜 최종 확정하고 캘린더/노션에 등록하기','am'],
+  ['2026-08-27','ebook','원고 톤앤매너·분량 기준 정하기 (목차는 완성됨)','pm'],
+  ['2026-08-27','web','rebootailab.com 도메인 구매 & 워드프레스 호스팅 신청','pm'],
+
+  ['2026-08-28','ebook','네이버 블로그 신규 개설 (프로필·카테고리 세팅)','am'],
+  ['2026-08-28','web','워드프레스 테마 설치 & 기본 설정','pm'],
+
+  ['2026-08-31','web','메인페이지 구조 기획 (소개/About/카테고리)','am'],
+  ['2026-08-31','shop','쇼핑쇼츠 유튜브 채널 개설 (채널아트·소개글)','am'],
+  ['2026-08-31','ebook','프롤로그 초안 쓰기 시작','pm'],
+
+  ['2026-09-01','web','로고 & 컬러 팔레트 정하기','am'],
+  ['2026-09-01','ebook','프롤로그 완성 + 1장 개요 잡기','pm'],
+
+  ['2026-09-02','shop','소재 리서치 방법 정립 (인스타분석 스킬로 트렌드 아이템 5개 추출)','am'],
+  ['2026-09-02','web','워드프레스 메인페이지 레이아웃 제작','pm'],
+
+  ['2026-09-04','insta','시사 인스타그램 계정 개설 & 프로필 세팅','am'],
+  ['2026-09-04','ebook','블로그에 프롤로그 초안 올리기','pm'],
+
+  ['2026-09-07','build','삼선동 공정 사진·메모 정리해 노션 건축일지 업데이트','am'],
+  ['2026-09-07','auto','n8n 설치 & 노션 API 연동 테스트','pm'],
+
+  ['2026-09-08','ebook','1장 원고 쓰기','pm'],
+
+  ['2026-09-09','web','About(소개) 페이지 콘텐츠 작성','am'],
+  ['2026-09-09','shop','숏폼 대본 템플릿 만들기 (3초 후킹 규칙 포함)','pm'],
+
+  ['2026-09-10','jp','일본쇼츠 채널 컨셉 정하고 참고 채널 리스트 정리','am'],
+  ['2026-09-10','ebook','1장 마무리하고 블로그 발행','pm'],
+
+  ['2026-09-11','auto','n8n: 노션(씨앗원고)→전자책 원고 자동화 1단계 테스트','am'],
+  ['2026-09-11','insta','테스트 게시물 1개 제작 (기사→카드뉴스→업로드 전 과정)','pm'],
+
+  ['2026-09-14','ebook','2장 개요 잡고 초안 쓰기','pm'],
+
+  ['2026-09-15','web','블로그 글목록 페이지 연결하고 테스트 포스팅 1개 업로드','pm'],
+
+  ['2026-09-16','shop','테스트 숏폼 1편 제작 (소재→대본→음성→편집 전 과정 리허설)','pm'],
+
+  ['2026-09-17','ebook','2장 마무리하고 블로그 발행','pm'],
+
+  ['2026-09-18','insta','테스트 게시물 2개차 올리기 (주 2회 리듬 점검)','am'],
+  ['2026-09-18','build','건축일지 블로그 포스팅 (진행상황 있으면)','pm'],
+
+  ['2026-09-21','ebook','3장 개요 잡고 초안 쓰기','pm'],
+
+  ['2026-09-22','auto','n8n: 원고→블로그용 글 변환 자동화 테스트','am'],
+  ['2026-09-22','web','반응형(모바일) 디자인 점검','pm'],
+
+  ['2026-09-23','shop','테스트 숏폼 2편째 - 업로드까지 완주해보기','am'],
+  ['2026-09-23','ebook','3장 마무리하고 발행','pm'],
+
+  ['2026-09-28','jp','일본쇼츠 유튜브 채널 개설 & 아트워크 세팅','am'],
+
+  ['2026-09-29','insta','3주차 게시물 올리기','am'],
+  ['2026-09-29','ebook','4장 개요 잡고 초안 쓰기','pm'],
+
+  ['2026-09-30','build','건축일지 정리 (사진·메모)','am'],
+  ['2026-09-30','web','워드프레스 1차 완성본 셀프 점검','pm'],
+
+  ['2026-10-01','jp','일본쇼츠 소재 리서치 & 첫 스크립트 아이디어 잡기','am'],
+  ['2026-10-01','ebook','4장 마무리하고 발행','pm'],
+
+  ['2026-10-02','insta','4주차 게시물 올리기','am'],
+  ['2026-10-02','shop','대본→음성(TTS) 자동화 테스트','pm'],
+
+  ['2026-10-06','ebook','5장 개요 잡고 초안 쓰기','pm'],
+
+  ['2026-10-07','auto','n8n: 카드뉴스용 텍스트 자동 생성 테스트','am'],
+  ['2026-10-07','web','SEO 기본 세팅 (메타디스크립션 등)','pm'],
+
+  ['2026-10-08','shop','테스트 숏폼 3편 (자막 자동 생성 적용)','am'],
+  ['2026-10-08','ebook','5장 마무리하고 발행','pm'],
+
+  ['2026-10-12','build','건축일지 정리 & 회고 메모 남기기','am'],
+  ['2026-10-12','jp','일본쇼츠 스크립트 2개 쓰기','pm'],
+
+  ['2026-10-13','ebook','6장 개요 잡고 초안 쓰기','pm'],
+
+  ['2026-10-14','web','최종 디자인 점검 & 배포 준비','pm'],
+
+  ['2026-10-15','insta','5주차 게시물 올리기','am'],
+  ['2026-10-15','ebook','6장 마무리하고 발행','pm'],
+
+  ['2026-10-16','shop','Make 자동화 시나리오 최종 점검 (노션-영상 파이프라인)','pm'],
+
+  ['2026-10-19','ebook','7장(마지막 장) 개요 잡고 초안 쓰기','pm'],
+
+  ['2026-10-20','jp','첫 테스트 영상 제작','pm'],
+
+  ['2026-10-21','web','rebootailab.com 정식 오픈 점검 (글 3개 이상 채워두기)','pm'],
+
+  ['2026-10-22','build','건축일지 정리','am'],
+  ['2026-10-22','ebook','7장 마무리하고 발행','pm'],
+
+  ['2026-10-23','insta','6주차 게시물 올리기 & 11월 콘텐츠 캘린더 초안 짜기','pm'],
+
+  ['2026-10-26','review','전자책 원고 전체 훑어보기 (오탈자·흐름 체크)','am'],
+  ['2026-10-26','ebook','에필로그 + 부록 쓰기','pm'],
+
+  ['2026-10-27','buffer','예비일 - 밀린 과업 처리 또는 연차로 사용 가능','am'],
+
+  ['2026-10-28','review','6개 프로젝트 11/1 본격운영 체크리스트 최종 점검','pm'],
+
+  ['2026-10-29','buffer','예비일 - 밀린 과업 처리 또는 연차로 사용 가능','am'],
+
+  ['2026-10-30','review','40일 회고 쓰기 & 11월 첫째 주 실행 계획 확정하기','pm']
+];
+
+const TASKS = RAW_TASKS.map((t,i)=>({ id:`${t[0]}-${i}`, date:t[0], cat:t[1], text:t[2], time:t[3] }));
+const byDate = {};
+TASKS.forEach(t=>{ (byDate[t.date] = byDate[t.date] || []).push(t); });
+const WORKDAYS = Object.keys(byDate).sort();
+
+/* ============ STATE ============ */
+let checks = {};
+try{ checks = JSON.parse(localStorage.getItem('reboot40_v1')) || {}; }catch(e){ checks = {}; }
+function saveChecks(){ try{ localStorage.setItem('reboot40_v1', JSON.stringify(checks)); }catch(e){} }
+function toggle(id){ checks[id] = !checks[id]; saveChecks(); renderAll(); }
+
+let selectedDate = null;
+let currentMonth = 7; // 0-indexed: 7 = August
+
+/* ============ HELPERS ============ */
+const DOW = ['일','월','화','수','목','금','토'];
+function fmt(dateStr){
+  const [y,m,d] = dateStr.split('-').map(Number);
+  const dt = new Date(y, m-1, d);
+  return { y, m, d, dow: DOW[dt.getDay()], isWeekend: dt.getDay()===0 || dt.getDay()===6 };
+}
+function phaseOf(dateStr){
+  return PHASES.find(p => dateStr >= p.start && dateStr <= p.end);
+}
+function dayCount(dateStr){
+  const tasks = byDate[dateStr] || [];
+  const done = tasks.filter(t=>checks[t.id]).length;
+  return { done, total: tasks.length };
+}
+function catCount(cat){
+  const tasks = TASKS.filter(t=>t.cat===cat);
+  const done = tasks.filter(t=>checks[t.id]).length;
+  return { done, total: tasks.length };
+}
+function totalCount(){
+  const done = TASKS.filter(t=>checks[t.id]).length;
+  return { done, total: TASKS.length };
+}
+
+/* ============ RENDER: HEADER ============ */
+function renderHeader(){
+  const today = new Date();
+  const sabbatical = new Date(2026,10,1); // Nov 1 2026
+  const diffDays = Math.ceil((sabbatical - today) / 86400000);
+  document.getElementById('ddayNum').textContent = diffDays > 0 ? `D-${diffDays}` : (diffDays===0 ? 'D-DAY' : `D+${-diffDays}`);
+  document.getElementById('ddaySub').textContent = '2026.11.01 안식년 시작';
+
+  const {done,total} = totalCount();
+  document.getElementById('progNum').textContent = `${done} / ${total}`;
+  document.getElementById('progFill').style.width = total? `${(done/total*100).toFixed(1)}%` : '0%';
+}
+
+/* ============ RENDER: TODAY CARD ============ */
+function todayStr(){
+  const t = new Date();
+  const y = t.getFullYear(), m = String(t.getMonth()+1).padStart(2,'0'), d = String(t.getDate()).padStart(2,'0');
+  return `${y}-${m}-${d}`;
+}
+function renderToday(){
+  const ds = todayStr();
+  const info = fmt(ds);
+  document.getElementById('todayDate').textContent = `${info.m}월 ${info.d}일 (${info.dow})`;
+  const box = document.getElementById('todayTasks');
+  const tasks = byDate[ds];
+  if(!tasks){
+    let msg = '오늘은 예정된 과업이 없는 날이에요. 계획 기간(8/27~10/30) 안이 아니거나 휴일·주말일 수 있어요.';
+    if(ds < '2026-08-27') msg = '아직 플랜 시작 전이에요. 8월 27일부터 시작됩니다.';
+    if(ds > '2026-10-30') msg = '40일 플랜 기간이 끝났어요. 이제 안식년 본편이 시작됩니다 🎉';
+    box.innerHTML = `<div class="today-empty">${msg}</div>`;
+    return;
+  }
+  box.innerHTML = tasks.map(t=>taskRowHTML(t)).join('');
+  attachTaskEvents(box);
+}
+
+/* ============ TASK ROW HTML ============ */
+function taskRowHTML(t){
+  const c = CATS[t.cat];
+  const checked = !!checks[t.id];
+  const timeLabel = t.time==='am' ? '🌤 업무중 짬' : '🌙 퇴근후';
+  return `
+  <div class="task-row">
+    <div class="task-check ${checked?'checked':''}" data-id="${t.id}"></div>
+    <div style="flex:1">
+      <div class="task-text ${checked?'checked':''}" data-id="${t.id}">${t.text}</div>
+      <div class="task-meta">
+        <span class="chip" style="background:${c.color}">${c.emoji} ${c.label}</span>
+        <span class="chip chip-time">${timeLabel}</span>
+      </div>
+    </div>
+  </div>`;
+}
+function attachTaskEvents(container){
+  container.querySelectorAll('[data-id]').forEach(el=>{
+    el.addEventListener('click', ()=> toggle(el.getAttribute('data-id')));
+  });
+}
+
+/* ============ RENDER: LEGEND ============ */
+function renderLegend(){
+  const el = document.getElementById('legend');
+  el.innerHTML = Object.entries(CATS).map(([k,c])=>
+    `<div class="legend-item"><span class="dot" style="background:${c.color}"></span>${c.emoji} ${c.label}</div>`
+  ).join('');
+}
+
+/* ============ RENDER: CALENDAR ============ */
+const MONTHS = [ {idx:7, y:2026, m:8, label:'8월'}, {idx:8, y:2026, m:9, label:'9월'}, {idx:9, y:2026, m:10, label:'10월'} ];
+function renderMonthbar(){
+  const el = document.getElementById('monthbar');
+  el.innerHTML = MONTHS.map(mo => `<button class="monthbtn ${mo.idx===currentMonth?'active':''}" data-m="${mo.idx}">${mo.label}</button>`).join('');
+  el.querySelectorAll('.monthbtn').forEach(b=>{
+    b.addEventListener('click', ()=>{ currentMonth = Number(b.getAttribute('data-m')); renderCalendar(); });
+  });
+}
+function renderCalendar(){
+  renderMonthbar();
+  const mo = MONTHS.find(x=>x.idx===currentMonth);
+  const y = mo.y, m = mo.m; // m is 1-indexed month
+  const firstDow = new Date(y, m-1, 1).getDay();
+  const daysInMonth = new Date(y, m, 0).getDate();
+  const grid = document.getElementById('calGrid');
+  let html = '';
+  for(let i=0;i<firstDow;i++) html += `<div class="cell empty"></div>`;
+  for(let d=1; d<=daysInMonth; d++){
+    const dateStr = `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const info = fmt(dateStr);
+    const tasks = byDate[dateStr];
+    const holiday = HOLIDAYS[dateStr];
+    const isBuffer = tasks && tasks.some(t=>t.cat==='buffer');
+
+    if(tasks){
+      const {done,total} = dayCount(dateStr);
+      const dots = [...new Set(tasks.map(t=>t.cat))].map(c=>`<span class="dot" style="background:${CATS[c].color}"></span>`).join('');
+      const allDone = done===total && total>0;
+      html += `<div class="cell ${isBuffer?'buffer':'workday'} ${allDone?'alldone':''} ${selectedDate===dateStr?'selected':''}" data-date="${dateStr}">
+        <div class="daynum">${d}</div>
+        <div class="daylabel">${info.dow}${isBuffer?' · 예비':''}</div>
+        <div class="dots">${dots}</div>
+        <div class="count ${allDone?'done':''}">${done}/${total}</div>
+      </div>`;
+    } else if(holiday){
+      html += `<div class="cell holiday"><div class="daynum">${d}</div><div class="daylabel">${holiday}</div></div>`;
+    } else if(info.isWeekend){
+      html += `<div class="cell weekend"><div class="daynum">${d}</div><div class="daylabel">주말</div></div>`;
+    } else {
+      html += `<div class="cell weekend"><div class="daynum">${d}</div></div>`;
+    }
+  }
+  grid.innerHTML = html;
+  grid.querySelectorAll('.cell.workday, .cell.buffer').forEach(c=>{
+    c.addEventListener('click', ()=>{
+      selectedDate = c.getAttribute('data-date'); renderCalendar(); renderDetail();
+      const d = document.getElementById('detail');
+      if(d && typeof d.scrollIntoView === 'function'){ d.scrollIntoView({behavior:'smooth', block:'nearest'}); }
+    });
+  });
+}
+
+function renderDetail(){
+  const el = document.getElementById('detail');
+  if(!selectedDate){ el.innerHTML = `<div class="detail-empty">달력에서 날짜를 눌러 그날의 할 일을 확인하세요.</div>`; return; }
+  const info = fmt(selectedDate);
+  const phase = phaseOf(selectedDate);
+  const tasks = byDate[selectedDate] || [];
+  el.innerHTML = `
+    <div class="detail-head">
+      <div class="detail-title">${info.m}월 ${info.d}일 (${info.dow})</div>
+      <div class="detail-phase">${phase ? phase.name : ''}</div>
+    </div>
+    <div>${tasks.map(t=>taskRowHTML(t)).join('')}</div>
+  `;
+  attachTaskEvents(el);
+}
+
+/* ============ RENDER: CHECKLIST TAB ============ */
+function renderChecklist(){
+  const el = document.getElementById('panel-list');
+  let html = '';
+  PHASES.forEach(p=>{
+    const dates = WORKDAYS.filter(d=> d>=p.start && d<=p.end);
+    if(dates.length===0) return;
+    const tasksInPhase = dates.flatMap(d=>byDate[d]);
+    const done = tasksInPhase.filter(t=>checks[t.id]).length;
+    html += `<div class="phase-block">
+      <div class="phase-title">${p.name} <span class="small">${done}/${tasksInPhase.length} 완료</span></div>`;
+    dates.forEach(d=>{
+      const info = fmt(d);
+      html += `<div class="date-group">
+        <div class="date-group-head">${info.m}/${info.d} (${info.dow})</div>
+        ${byDate[d].map(t=>taskRowHTML(t)).join('')}
+      </div>`;
+    });
+    html += `</div>`;
+  });
+  el.innerHTML = html;
+  attachTaskEvents(el);
+}
+
+/* ============ RENDER: STATUS TAB ============ */
+function renderStatus(){
+  const el = document.getElementById('panel-stat');
+  let html = `<div style="margin-bottom:22px;">`;
+  PHASES.forEach(p=>{
+    const dates = WORKDAYS.filter(d=> d>=p.start && d<=p.end);
+    const tasksInPhase = dates.flatMap(d=>byDate[d]);
+    const done = tasksInPhase.filter(t=>checks[t.id]).length;
+    const pct = tasksInPhase.length ? (done/tasksInPhase.length*100) : 0;
+    html += `<div class="stat-row">
+      <div class="stat-top"><div class="stat-name">${p.name}</div><div class="stat-frac">${done}/${tasksInPhase.length}</div></div>
+      <div class="stat-bar"><div class="stat-fill" style="width:${pct}%; background:var(--gold);"></div></div>
+    </div>`;
+  });
+  html += `</div><div style="border-top:1.5px solid var(--ink); padding-top:18px;">`;
+  Object.entries(CATS).forEach(([k,c])=>{
+    const {done,total} = catCount(k);
+    if(total===0) return;
+    const pct = total ? (done/total*100) : 0;
+    html += `<div class="stat-row">
+      <div class="stat-top"><div class="stat-name">${c.emoji} ${c.label}</div><div class="stat-frac">${done}/${total}</div></div>
+      <div class="stat-bar"><div class="stat-fill" style="width:${pct}%; background:${c.color};"></div></div>
+    </div>`;
+  });
+  html += `</div>`;
+  el.innerHTML = html;
+}
+
+/* ============ TABS ============ */
+document.querySelectorAll('.tabbtn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tabbtn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-'+btn.getAttribute('data-tab')).classList.add('active');
+  });
+});
+
+/* ============ RESET ============ */
+document.getElementById('resetBtn').addEventListener('click', ()=>{
+  if(confirm('정말 모든 체크를 초기화할까요? 되돌릴 수 없어요.')){
+    checks = {}; saveChecks(); renderAll();
+  }
+});
+
+/* ============ RENDER ALL ============ */
+function renderAll(){
+  renderHeader();
+  renderToday();
+  renderLegend();
+  renderCalendar();
+  renderDetail();
+  renderChecklist();
+  renderStatus();
+}
+
+// auto-select today's date on load if it falls within the plan
+(function initSelection(){
+  const ds = todayStr();
+  if(byDate[ds]) selectedDate = ds;
+  const moMatch = MONTHS.find(mo => `${mo.y}-${String(mo.m).padStart(2,'0')}` === ds.slice(0,7));
+  if(moMatch) currentMonth = moMatch.idx;
+})();
+
+renderAll();
+</script>
+</body>
+</html>
