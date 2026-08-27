@@ -267,7 +267,7 @@
 <header>
   <p class="eyebrow">Re-Boot AI Lab · 은퇴 준비 아카이브</p>
   <h1>안식년으로 가는 40일</h1>
-  <p class="sub">2026.08.27 – 2026.10.31 · 실근무일 42일(연차 2일 버퍼 포함) 동안 6개 프로젝트의 씨앗을 심습니다. 11월 1일부터는 자동화된 파이프라인으로 본격 운영을 시작해요.</p>
+  <p class="sub">2026.08.27 – 2026.11.30 · 6개 프로젝트를 준비하는 실근무일 여정(8/27~10/31)부터, 안식년 첫 달(11월) 루틴을 정착시키는 시기까지의 로드맵입니다.</p>
   <div class="headline-row">
     <div class="dday-box">
       <div class="dday-label">안식년까지</div>
@@ -321,11 +321,11 @@
   <p class="foot-note"><span id="syncStatus">☁️ 연결 중...</span> · 정사서의 기록카드처럼, 하루하루를 쌓아가요 🗂️</p>
 </footer>
 
-<script type="module">
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js" onerror="window.__fbLoadFailed=true"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js" onerror="window.__fbLoadFailed=true"></script>
+<script>
 /* ============ FIREBASE (기기 간 동기화) ============ */
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
-import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
-
+/* compat 방식 클래식 스크립트 사용 — CDN 차단/오프라인이어도 앱 전체가 죽지 않고 로컬 저장으로 자동 대체됩니다. */
 const firebaseConfig = {
   apiKey: "AIzaSyDIEqnISJwHq_w0fNCr4ougL0nGQa2uPbk",
   authDomain: "reboot-40day.firebaseapp.com",
@@ -335,7 +335,7 @@ const firebaseConfig = {
   appId: "1:198724785153:web:4a7c6c6c3a05f9b9e49c00"
 };
 
-let db = null;
+let checksDocRef = null;
 let firebaseReady = false;
 let suppressNextSnapshot = false; // avoid re-render loop right after our own write
 
@@ -346,14 +346,38 @@ function setSyncStatus(text, ok){
   el.style.color = ok===true ? 'var(--good)' : (ok===false ? '#A6432D' : 'var(--muted)');
 }
 
-try{
-  const app = initializeApp(firebaseConfig);
-  db = getFirestore(app);
-  firebaseReady = true;
-}catch(e){
-  console.error('Firebase init failed', e);
-  setSyncStatus('⚠️ 동기화 연결 실패 (로컬에만 저장됨)', false);
+function initFirebase(){
+  try{
+    if(window.__fbLoadFailed || typeof firebase === 'undefined'){
+      throw new Error('Firebase SDK not loaded');
+    }
+    setSyncStatus('☁️ 연결 중...', null);
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    checksDocRef = db.collection('reboot40').doc('checks');
+    firebaseReady = true;
+
+    checksDocRef.onSnapshot((snap)=>{
+      if(suppressNextSnapshot){ suppressNextSnapshot = false; setSyncStatus('☁️ 동기화됨 · ' + new Date().toLocaleTimeString('ko-KR'), true); return; }
+      if(snap.exists){
+        checks = snap.data().data || {};
+        saveChecksLocal();
+        renderAll();
+        setSyncStatus('☁️ 다른 기기에서 업데이트됨 · ' + new Date().toLocaleTimeString('ko-KR'), true);
+      } else {
+        saveChecksRemote();
+      }
+    }, (err)=>{
+      console.error('Firestore listen failed', err);
+      setSyncStatus('⚠️ 동기화 연결 끊김 (로컬에만 저장됨)', false);
+    });
+  }catch(e){
+    console.error('Firebase init failed', e);
+    firebaseReady = false;
+    setSyncStatus('⚠️ 동기화 연결 실패 (로컬에만 저장됨)', false);
+  }
 }
+initFirebase(); // 실패해도 아래 앱 로직은 정상 동작
 
 /* ============ DATA ============ */
 const CATS = {
@@ -369,14 +393,16 @@ const CATS = {
 };
 
 const PHASES = [
-  {id:1, name:'1단계 · 인프라 세팅',              start:'2026-08-27', end:'2026-08-31'},
-  {id:2, name:'2단계 · 파이프라인 구축 & 초기 제작', start:'2026-09-01', end:'2026-09-30'},
-  {id:3, name:'3단계 · 자동화 완성 & 런칭 리허설',   start:'2026-10-01', end:'2026-10-31'}
+  {id:1, name:'1단계 · 인프라 세팅',              start:'2026-08-27', end:'2026-09-04'},
+  {id:2, name:'2단계 · 파이프라인 구축 & 초기 제작', start:'2026-09-07', end:'2026-09-30'},
+  {id:3, name:'3단계 · 자동화 완성 & 런칭 리허설',   start:'2026-10-01', end:'2026-10-31'},
+  {id:4, name:'4단계 · 안식년 시작 & 본격 운영',     start:'2026-11-01', end:'2026-11-30'}
 ];
 
 const HOLIDAYS = {
   '2026-09-03':'방송의 날', '2026-09-24':'추석연휴', '2026-09-25':'추석연휴', '2026-09-26':'추석연휴',
-  '2026-10-03':'개천절', '2026-10-05':'대체공휴일', '2026-10-09':'한글날'
+  '2026-10-03':'개천절', '2026-10-05':'대체공휴일', '2026-10-09':'한글날',
+  '2026-11-20':'삼금회'
 };
 
 const RAW_TASKS = [
@@ -447,39 +473,36 @@ const RAW_TASKS = [
   ['2026-10-02','insta','4주차 게시물 올리기','am'],
   ['2026-10-02','shop','대본→음성(TTS) 자동화 테스트','pm'],
 
-  ['2026-10-06','ebook','5장 개요 잡고 초안 쓰기','pm'],
+  ['2026-10-06','ebook','4장 마무리하고 발행','pm'],
 
   ['2026-10-07','auto','n8n: 카드뉴스용 텍스트 자동 생성 테스트','am'],
   ['2026-10-07','web','SEO 기본 세팅 (메타디스크립션 등)','pm'],
 
   ['2026-10-08','shop','테스트 숏폼 3편 (자막 자동 생성 적용)','am'],
-  ['2026-10-08','ebook','5장 마무리하고 발행','pm'],
 
   ['2026-10-12','build','건축일지 정리 & 회고 메모 남기기','am'],
   ['2026-10-12','jp','일본쇼츠 스크립트 2개 쓰기','pm'],
 
-  ['2026-10-13','ebook','6장 개요 잡고 초안 쓰기','pm'],
+  ['2026-10-13','ebook','5장 개요 잡고 초안 쓰기','pm'],
 
   ['2026-10-14','web','최종 디자인 점검 & 배포 준비','pm'],
 
   ['2026-10-15','insta','5주차 게시물 올리기','am'],
-  ['2026-10-15','ebook','6장 마무리하고 발행','pm'],
 
   ['2026-10-16','shop','Make 자동화 시나리오 최종 점검 (노션-영상 파이프라인)','pm'],
 
-  ['2026-10-19','ebook','7장(마지막 장) 개요 잡고 초안 쓰기','pm'],
+  ['2026-10-19','jp','두 번째 테스트 영상 제작 & 피드백 반영','pm'],
 
-  ['2026-10-20','jp','첫 테스트 영상 제작','pm'],
+  ['2026-10-20','ebook','5장 마무리하고 발행','pm'],
 
   ['2026-10-21','web','rebootailab.com 정식 오픈 점검 (글 3개 이상 채워두기)','pm'],
 
   ['2026-10-22','build','건축일지 정리','am'],
-  ['2026-10-22','ebook','7장 마무리하고 발행','pm'],
 
   ['2026-10-23','insta','6주차 게시물 올리기 & 11월 콘텐츠 캘린더 초안 짜기','pm'],
 
-  ['2026-10-26','review','전자책 원고 전체 훑어보기 (오탈자·흐름 체크)','am'],
-  ['2026-10-26','ebook','에필로그 + 부록 쓰기','pm'],
+  ['2026-10-26','review','전자책 원고 1~5장 훑어보기 (오탈자·흐름 체크)','am'],
+  ['2026-10-26','auto','전체 자동화 파이프라인 통합 리허설 (엔드투엔드 1회 실행)','pm'],
 
   ['2026-10-27','buffer','예비일 - 밀린 과업 처리 또는 연차로 사용 가능','am'],
 
@@ -487,7 +510,48 @@ const RAW_TASKS = [
 
   ['2026-10-29','buffer','예비일 - 밀린 과업 처리 또는 연차로 사용 가능','am'],
 
-  ['2026-10-30','review','40일 회고 쓰기 & 11월 첫째 주 실행 계획 확정하기','pm']
+  ['2026-10-30','review','안식년 진입 최종 점검 & 소감 정리하기','pm'],
+
+  ['2026-11-02','review','안식년 첫날! 자동화 파이프라인(블로그·카드뉴스·숏폼) 정상 작동 확인하기','sb'],
+
+  ['2026-11-03','ebook','6장 개요 잡고 초안 쓰기','sb'],
+
+  ['2026-11-04','insta','게시물 올리기 (주 2회 중 1)','sb'],
+
+  ['2026-11-05','shop','숏폼 제작 + 업로드, 지난주 성과(조회수·클릭) 체크','sb'],
+
+  ['2026-11-06','jp','세 번째 테스트 영상 제작 (12월 론칭 대비)','sb'],
+
+  ['2026-11-09','insta','게시물 올리기 (주 2회 중 2)','sb'],
+
+  ['2026-11-10','ebook','6장 마무리하고 발행','sb'],
+
+  ['2026-11-11','shop','숏폼 제작 + 업로드','sb'],
+
+  ['2026-11-12','build','건축일지 정리','sb'],
+
+  ['2026-11-13','auto','자동화 파이프라인 개선 (오류난 부분 점검·수정)','sb'],
+
+  ['2026-11-16','insta','게시물 올리기 (주 2회 중 1)','sb'],
+
+  ['2026-11-17','ebook','7장(마지막 장) 개요 잡고 초안 쓰기','sb'],
+
+  ['2026-11-18','shop','숏폼 제작 + 업로드, 2주차 성과 리뷰','sb'],
+
+  ['2026-11-19','jp','채널 소개 영상 & 첫 정식 업로드 소재 준비 (12/1 론칭 임박)','sb'],
+
+  ['2026-11-23','insta','게시물 올리기 (주 2회 중 2)','sb'],
+
+  ['2026-11-24','ebook','7장 마무리하고 발행','sb'],
+
+  ['2026-11-25','shop','숏폼 제작 + 업로드','sb'],
+
+  ['2026-11-26','ebook','에필로그 + 부록 쓰기','sb'],
+
+  ['2026-11-27','jp','12월 론칭 최종 점검 (썸네일·제목·업로드 스케줄)','sb'],
+
+  ['2026-11-30','ebook','전자책 원고 전체 최종 탈고','sb'],
+  ['2026-11-30','review','안식년 첫 달 회고 쓰기 & 12월 계획 세우기','sb']
 ];
 
 const TASKS = RAW_TASKS.map((t,i)=>({ id:`${t[0]}-${i}`, date:t[0], cat:t[1], text:t[2], time:t[3] }));
@@ -502,10 +566,10 @@ try{ checks = JSON.parse(localStorage.getItem('reboot40_v1')) || {}; }catch(e){ 
 function saveChecksLocal(){ try{ localStorage.setItem('reboot40_v1', JSON.stringify(checks)); }catch(e){} }
 
 async function saveChecksRemote(){
-  if(!firebaseReady) return;
+  if(!firebaseReady || !checksDocRef) return;
   try{
     suppressNextSnapshot = true;
-    await setDoc(doc(db, 'reboot40', 'checks'), { data: checks, updatedAt: Date.now() });
+    await checksDocRef.set({ data: checks, updatedAt: Date.now() });
     setSyncStatus('☁️ 동기화됨 · ' + new Date().toLocaleTimeString('ko-KR'), true);
   }catch(e){
     console.error('Firestore write failed', e);
@@ -516,27 +580,6 @@ async function saveChecksRemote(){
 function saveChecks(){ saveChecksLocal(); saveChecksRemote(); }
 
 function toggle(id){ checks[id] = !checks[id]; saveChecks(); renderAll(); }
-
-/* 실시간 리스너: 다른 기기/브라우저에서 체크하면 여기도 자동 반영 */
-if(firebaseReady){
-  setSyncStatus('☁️ 연결 중...', null);
-  onSnapshot(doc(db, 'reboot40', 'checks'), (snap)=>{
-    if(suppressNextSnapshot){ suppressNextSnapshot = false; setSyncStatus('☁️ 동기화됨 · ' + new Date().toLocaleTimeString('ko-KR'), true); return; }
-    if(snap.exists()){
-      const remote = snap.data().data || {};
-      checks = remote;
-      saveChecksLocal();
-      renderAll();
-      setSyncStatus('☁️ 다른 기기에서 업데이트됨 · ' + new Date().toLocaleTimeString('ko-KR'), true);
-    } else {
-      // 원격 문서가 아직 없으면 로컬 상태로 최초 생성
-      saveChecksRemote();
-    }
-  }, (err)=>{
-    console.error('Firestore listen failed', err);
-    setSyncStatus('⚠️ 동기화 연결 끊김 (로컬에만 저장됨)', false);
-  });
-}
 
 let selectedDate = null;
 let currentMonth = 7; // 0-indexed: 7 = August
@@ -603,10 +646,11 @@ function renderToday(){
 }
 
 /* ============ TASK ROW HTML ============ */
+const TIME_LABELS = { am:'🌤 업무중 짬', pm:'🌙 퇴근후', sb:'🌿 안식년 시간(3~4h)' };
 function taskRowHTML(t){
   const c = CATS[t.cat];
   const checked = !!checks[t.id];
-  const timeLabel = t.time==='am' ? '🌤 업무중 짬' : '🌙 퇴근후';
+  const timeLabel = TIME_LABELS[t.time] || '';
   return `
   <div class="task-row">
     <div class="task-check ${checked?'checked':''}" data-id="${t.id}"></div>
@@ -634,7 +678,7 @@ function renderLegend(){
 }
 
 /* ============ RENDER: CALENDAR ============ */
-const MONTHS = [ {idx:7, y:2026, m:8, label:'8월'}, {idx:8, y:2026, m:9, label:'9월'}, {idx:9, y:2026, m:10, label:'10월'} ];
+const MONTHS = [ {idx:7, y:2026, m:8, label:'8월'}, {idx:8, y:2026, m:9, label:'9월'}, {idx:9, y:2026, m:10, label:'10월'}, {idx:10, y:2026, m:11, label:'11월'} ];
 function renderMonthbar(){
   const el = document.getElementById('monthbar');
   el.innerHTML = MONTHS.map(mo => `<button class="monthbtn ${mo.idx===currentMonth?'active':''}" data-m="${mo.idx}">${mo.label}</button>`).join('');
