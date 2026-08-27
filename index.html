@@ -318,10 +318,43 @@
 
 <footer>
   <button class="reset-btn" id="resetBtn">전체 체크 초기화</button>
-  <p class="foot-note">체크 상태는 이 브라우저에 자동 저장됩니다 · 정사서의 기록카드처럼, 하루하루를 쌓아가요 🗂️</p>
+  <p class="foot-note"><span id="syncStatus">☁️ 연결 중...</span> · 정사서의 기록카드처럼, 하루하루를 쌓아가요 🗂️</p>
 </footer>
 
-<script>
+<script type="module">
+/* ============ FIREBASE (기기 간 동기화) ============ */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDIEqnISJwHq_w0fNCr4ougL0nGQa2uPbk",
+  authDomain: "reboot-40day.firebaseapp.com",
+  projectId: "reboot-40day",
+  storageBucket: "reboot-40day.firebasestorage.app",
+  messagingSenderId: "198724785153",
+  appId: "1:198724785153:web:4a7c6c6c3a05f9b9e49c00"
+};
+
+let db = null;
+let firebaseReady = false;
+let suppressNextSnapshot = false; // avoid re-render loop right after our own write
+
+function setSyncStatus(text, ok){
+  const el = document.getElementById('syncStatus');
+  if(!el) return;
+  el.textContent = text;
+  el.style.color = ok===true ? 'var(--good)' : (ok===false ? '#A6432D' : 'var(--muted)');
+}
+
+try{
+  const app = initializeApp(firebaseConfig);
+  db = getFirestore(app);
+  firebaseReady = true;
+}catch(e){
+  console.error('Firebase init failed', e);
+  setSyncStatus('⚠️ 동기화 연결 실패 (로컬에만 저장됨)', false);
+}
+
 /* ============ DATA ============ */
 const CATS = {
   ebook:  {label:'전자책·블로그',      emoji:'📘', color:'var(--c-ebook)'},
@@ -465,8 +498,45 @@ const WORKDAYS = Object.keys(byDate).sort();
 /* ============ STATE ============ */
 let checks = {};
 try{ checks = JSON.parse(localStorage.getItem('reboot40_v1')) || {}; }catch(e){ checks = {}; }
-function saveChecks(){ try{ localStorage.setItem('reboot40_v1', JSON.stringify(checks)); }catch(e){} }
+
+function saveChecksLocal(){ try{ localStorage.setItem('reboot40_v1', JSON.stringify(checks)); }catch(e){} }
+
+async function saveChecksRemote(){
+  if(!firebaseReady) return;
+  try{
+    suppressNextSnapshot = true;
+    await setDoc(doc(db, 'reboot40', 'checks'), { data: checks, updatedAt: Date.now() });
+    setSyncStatus('☁️ 동기화됨 · ' + new Date().toLocaleTimeString('ko-KR'), true);
+  }catch(e){
+    console.error('Firestore write failed', e);
+    setSyncStatus('⚠️ 동기화 실패 (로컬에는 저장됨)', false);
+  }
+}
+
+function saveChecks(){ saveChecksLocal(); saveChecksRemote(); }
+
 function toggle(id){ checks[id] = !checks[id]; saveChecks(); renderAll(); }
+
+/* 실시간 리스너: 다른 기기/브라우저에서 체크하면 여기도 자동 반영 */
+if(firebaseReady){
+  setSyncStatus('☁️ 연결 중...', null);
+  onSnapshot(doc(db, 'reboot40', 'checks'), (snap)=>{
+    if(suppressNextSnapshot){ suppressNextSnapshot = false; setSyncStatus('☁️ 동기화됨 · ' + new Date().toLocaleTimeString('ko-KR'), true); return; }
+    if(snap.exists()){
+      const remote = snap.data().data || {};
+      checks = remote;
+      saveChecksLocal();
+      renderAll();
+      setSyncStatus('☁️ 다른 기기에서 업데이트됨 · ' + new Date().toLocaleTimeString('ko-KR'), true);
+    } else {
+      // 원격 문서가 아직 없으면 로컬 상태로 최초 생성
+      saveChecksRemote();
+    }
+  }, (err)=>{
+    console.error('Firestore listen failed', err);
+    setSyncStatus('⚠️ 동기화 연결 끊김 (로컬에만 저장됨)', false);
+  });
+}
 
 let selectedDate = null;
 let currentMonth = 7; // 0-indexed: 7 = August
